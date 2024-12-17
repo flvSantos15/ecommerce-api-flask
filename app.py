@@ -148,6 +148,23 @@ def remove_from_cart(product_id):
   return jsonify({"message": "Failed to remove item from the cart"}), 400
 
 # Parei no 41:28, faltando 17:32
+@app.route('/api/cart', methods=['GET'])
+@login_required
+def view_cart():
+  user = User.query.get(int(current_user.id))
+  cart_items = user.cart
+  cart_content = []
+  for cart_item in cart_items:
+    product = Product.query.get(cart_item.product_id)
+    item = {
+      "id": cart_item.id,
+      "user_id": cart.user_id,
+      "product_id": cart_item.product_id,
+      "product_name": product.name,
+      "product_price": product.price
+    }
+    cart_content.append(item)
+  return jsonify(cart_content) 
 
 # debug is only used in develop enviroment
 if __name__ == "__main__":
