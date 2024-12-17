@@ -1,5 +1,7 @@
 from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
+from flask_cors import CORS
+from flask_login import UserMixin
 
 app = Flask(__name__)
 # config of db
@@ -7,11 +9,17 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///ecommerce.db'
 
 # start of the db
 db = SQLAlchemy(app)
+CORS(app)
+
 
 # Modelagem
-# Produto (id, name, price, description)
+# User (id, username, password)
+class User(db.Model):
+  id = db.Column(db.Integer, primary_key=True)
+  username = db.Column(db.String(80), unique=True, nullable=False)
+  password = db.Column(db.String(80), nullable=False)
 
-# Definition of the table product
+# Produto (id, name, price, description)
 class Product(db.Model):
   id = db.Column(db.Integer, primary_key=True)
   name = db.Column(db.String(120), nullable=False)
@@ -28,7 +36,6 @@ def add_product():
     db.session.commit()
     return jsonify({"message": "Product added sucessfully!"})
   return jsonify({"message": "Invalid product data"}), 400
-
 
 @app.route('/api/products/delete/<int:product_id>', methods=['DELETE'])
 def delete_product(product_id):
@@ -51,6 +58,38 @@ def get_product_details(product_id):
     })
 
   return jsonify({"message": "Product not found!"}), 404
+
+@app.route('/api/products/update/<int:product_id>', methods=['PUT'])
+def update_product(product_id):
+  product = Product.query.get(product_id)
+  if not product:
+    return jsonify({"message", "Product not found"}), 404
+
+  data = request.body
+  if 'name' in data:
+    product.name = data['name']
+
+  if 'price' in data:
+    product.price = data['price']
+
+  if 'description' in data:
+    product.description = data['description']
+
+  db.session.commit()
+  return jsonify({"message": "Product updated successfully."})
+
+@app.route('/api/products', methods=['GET'])
+def get_products():
+  products = Product.query.all()
+  product_list = []
+  for product in products:
+    product_data = {
+      "id": product.id,
+      "name": product.name,
+      "price": product.price
+    }
+    product_list.append(product_data)
+  return jsonify(product_list)
 
 # route definition
 @app.route('/')
