@@ -147,7 +147,6 @@ def remove_from_cart(product_id):
     return jsonify({"message": "Item removed from the cart successufully"})
   return jsonify({"message": "Failed to remove item from the cart"}), 400
 
-# Parei no 41:28, faltando 17:32
 @app.route('/api/cart', methods=['GET'])
 @login_required
 def view_cart():
@@ -175,6 +174,8 @@ def checkout():
     db.session.delete(cart_item)
   db.session.commit()
   return jsonify({"message":"Checkout successful. Cart has been cleared."})
+
+# Parei no 33:04, faltando 23:07
 
 # debug is only used in develop enviroment
 if __name__ == "__main__":
